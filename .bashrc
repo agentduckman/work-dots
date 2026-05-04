@@ -105,18 +105,3 @@ alias gps='git push'
 alias gst='git status'
 alias gsw='git switch'
 alias kali='distrobox enter --root kali'
-ssh() {
-    ~/.local/bin/ssh-kitty "$@"
-}
-
-sshp() {
-    SSH_KITTY_INTERACTIVE_AUTH=1 ~/.local/bin/ssh-kitty "$@"
-}
-
-sshraw() {
-    SSH_KITTY_INTERACTIVE_AUTH=1 SSH_KITTY_NO_REMOTE_TMUX=1 ~/.local/bin/ssh-kitty "$@"
-}
-
-sshr() {
-    command ssh "$@"
-}
