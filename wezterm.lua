@@ -3,6 +3,45 @@ local act = wezterm.action
 
 local config = wezterm.config_builder()
 
+local direction_keys = {
+	h = "Left",
+	j = "Down",
+	k = "Up",
+	l = "Right",
+}
+
+local function basename(path)
+	return string.gsub(path or "", "(.*[/\\])(.*)", "%2")
+end
+
+local function foreground_process(pane)
+	return basename(pane:get_foreground_process_name())
+end
+
+local function is_nvim(pane)
+	return pane:get_user_vars().IS_NVIM == "true"
+		or foreground_process(pane) == "nvim"
+		or foreground_process(pane) == "vim"
+end
+
+local function is_tmux(pane)
+	return foreground_process(pane) == "tmux"
+end
+
+local function split_nav(key)
+	return {
+		key = key,
+		mods = "CTRL",
+		action = wezterm.action_callback(function(window, pane)
+			if is_nvim(pane) or is_tmux(pane) then
+				window:perform_action(act.SendKey({ key = key, mods = "CTRL" }), pane)
+			else
+				window:perform_action(act.ActivatePaneDirection(direction_keys[key]), pane)
+			end
+		end),
+	}
+end
+
 -- ---- basics ----
 config.font = wezterm.font("JetBrainsMono Nerd Font")
 config.font_size = 14
@@ -61,6 +100,12 @@ config.keys = {
 	{ key = "j", mods = "LEADER", action = act.ActivatePaneDirection("Down") },
 	{ key = "k", mods = "LEADER", action = act.ActivatePaneDirection("Up") },
 	{ key = "l", mods = "LEADER", action = act.ActivatePaneDirection("Right") },
+
+	-- smart-splits.nvim-aware pane navigation
+	split_nav("h"),
+	split_nav("j"),
+	split_nav("k"),
+	split_nav("l"),
 
 	-- rotate panes
 	{
